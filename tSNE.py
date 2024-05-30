@@ -200,7 +200,7 @@ def plot_tSNE_best(model, layer_name, test_data, test_labels, save_dir, cal_fold
         file.write(html_str_with_style)
 
 
-
+# 產出次等結果
 def plot_tSNE_tuning(model, layer_name, test_data, test_labels, save_dir, cal_folder, nor_folder, label_name=['Nor', 'Cal']):
 
     batch_size = 64
