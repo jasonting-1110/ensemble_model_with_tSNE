@@ -11,6 +11,8 @@ from IPython.display import Image
 import re
 import base64  #将PNG图像解析为base64编码并将其插入到HTML中
 import json
+import shutil
+
 
 
 #函式參數的輸入
@@ -49,7 +51,7 @@ def create_html_with_image(encoded_string, true_label, predicted_label):
     html = f'<img src="data:image/png;base64,{encoded_string}"><br>True Label: {true_label}<br>Predicted Label: {predicted_label}'
     return html
 
-#為 True Label 的 <p> 標籤添加 true-label 類名，才能使用js中的querySelector準確地選擇到這些元素
+
 
 
 def create_html_with_two_images(encoded_string, CAM_encoded_string, true_label_info, predicted_label):
@@ -58,21 +60,20 @@ def create_html_with_two_images(encoded_string, CAM_encoded_string, true_label_i
             f'<img src="data:image/png;base64,{CAM_encoded_string}" width="100" height="100">'
             f'<img src="data:image/png;base64,{encoded_string}" width="100" height="100"></div>')
 
-
+#  <div class="image-container" data-keywords="{true_label_info}">
+# </div>
 #測試新改的函式:添加的屬性要用" "包住
 def create_html_images_ID(encoded_string, CAM_encoded_string, true_label_info, predicted_label):
-    html = f'''
-    <div class="image-container" data-keywords="{true_label_info}">
+    return  f'''
+   <div class="image-container" data-keywords="{true_label_info}">
         <img src="data:image/png;base64,{encoded_string}" width="200">     
         <img src="data:image/png;base64,{CAM_encoded_string}" width="200">
         <br>
         <span class="true-label" style="font-size: 30px;"> True Label:{true_label_info}</span> 
         <br>
         <span class="true-label" style="font-size: 30px;"> Predicted: {predicted_label} </span>
-          
-    </div>
+    </div>      
     '''
-    return html
 
 #搜尋引擎
 ##########################
@@ -1015,6 +1016,7 @@ def keySearch_tooltip(model, layer_name, test_data, test_labels, save_dir, cal_f
 
     # 將文件名轉換為 JSON 格式的字符串:才能在js中使用python的數據
     file_names_json = json.dumps(file_names)
+    combined_labels_json = json.dumps(combined_labels)
 
     html_str_with_style = (f'''
         <p style="font-size: 30px;">tSNE Accuracy: {tSNE_acc:.2f}</p>
@@ -1026,7 +1028,7 @@ def keySearch_tooltip(model, layer_name, test_data, test_labels, save_dir, cal_f
         <div style="display: flex; justify-content: center;"><div>{html_str}</div></div>
         <script>
            var fileNames = {file_names_json};
-           var combinedLabels = {json.dumps(combined_labels)};
+           var combinedLabels = {combined_labels_json};
 
             function setupSearchAndTooltip() {{
                 var searchBox = document.getElementById('search-box');
@@ -1119,8 +1121,9 @@ def keySearch_tooltip(model, layer_name, test_data, test_labels, save_dir, cal_f
     with open(save_path, 'w') as file:
         file.write(html_str_with_style)
 
-def keySearch_tooltip_try(model, layer_name, test_data, test_labels, save_dir, cal_folder, nor_folder, cal_CAM_folder, nor_CAM_folder):
-    batch_size = 128 #原64，調大看速度是否加快
+#把js code另外存取並引入，方便閱讀
+def keySearch_optimize(model, layer_name, test_data, test_labels, save_dir, cal_folder, nor_folder, cal_CAM_folder, nor_CAM_folder):
+    batch_size = 128 #原64，調大看速度是否加快(並沒有明顯加快)
     intermediate_layer_model = Model(inputs=model.input, outputs=model.get_layer(layer_name).output)
     intermediate_output = intermediate_layer_model.predict(test_data, batch_size=batch_size, verbose=1)
 
@@ -1198,8 +1201,7 @@ def keySearch_tooltip_try(model, layer_name, test_data, test_labels, save_dir, c
             CAM_image_path = extract_image_path_from_html(CAM_tooltip)
             CAM_encoded_string = encode_image_to_base64(CAM_image_path)
 
-            
-            #創建包含圖像的HTML
+          
             html_content = create_html_images_ID(encoded_string, CAM_encoded_string, true_label_info, predicted_labels_group[j])
             combined_labels.append(html_content)
 
@@ -1226,8 +1228,7 @@ def keySearch_tooltip_try(model, layer_name, test_data, test_labels, save_dir, c
 
     scatter = ax.scatter(all_x, all_y, c=all_colors, marker='o', alpha=0.8)  # 添加 ids 参数->ax.scatter不接受!!
 
-    # 為散點圖添加一個特定的 ID
-    scatter.set_gid('my-scatter-plot')
+
 
     #print(file_names):確認資訊正確(存取了各種病理資料的名稱)
 
@@ -1251,140 +1252,42 @@ def keySearch_tooltip_try(model, layer_name, test_data, test_labels, save_dir, c
     cls_error_count = nor_cls_error_count + cal_cls_error_count 
     tSNE_acc = (total_points - cls_error_count) / total_points
 
-    # 生成 HTML 時，mpld3 會自動給每個工具提示添加 .mpld3-tooltip 類別
     html_str = mpld3.fig_to_html(fig)
-   
+    # 修改 html_str_with_style，添加搜索功能的 JavaScript 代码
 
     # 將文件名轉換為 JSON 格式的字符串:才能在js中使用python的數據
     file_names_json = json.dumps(file_names)
+    combined_labels_json = json.dumps(combined_labels)
 
+    #將fileNames和combinedLabels在全局作用域定義，使其可以在外部js中被訪問
+    #修改keysearch.js的路徑:D:\OCT\dental OCT\bare tooth\ensemble_model_aug\code\reqiured_funcs
     html_str_with_style = (f'''
-        <p>tSNE Accuracy: {tSNE_acc:.2f}</p>
-        <p>nor_cls_error_point: {nor_cls_error_count}/{total_points}</p>
-        <p>cal_cls_error_point: {cal_cls_error_count}/{total_points}</p>
-        <p>Number of Cal points: {cal_count}</p>
-        <p>Number of Nor points: {nor_count}</p>
+        <p style="font-size: 30px;">tSNE Accuracy: {tSNE_acc:.2f}</p>
+        <p style="font-size: 30px;">nor_cls_error_point: {nor_cls_error_count}/{total_points}</p>
+        <p style="font-size: 30px;">cal_cls_error_point: {cal_cls_error_count}/{total_points}</p>
+        <p style="font-size: 30px;">Number of Cal points: {cal_count}</p>
+        <p style="font-size: 30px;">Number of Nor points: {nor_count}</p>
         <input type="text" id="search-box" onkeyup="searchFunction()" placeholder="Search for true_label_info">
         <div style="display: flex; justify-content: center;"><div>{html_str}</div></div>
         <script>
-           var fileNames = {file_names_json};
-           var combinedLabels = {json.dumps(combined_labels)};
-
-            function setupSearchAndTooltip() {{
-                var searchBox = document.getElementById('search-box');
-                var searchResults = document.getElementById('search-results');
-                var tooltip = document.getElementById('tooltip');
-                var points = document.querySelectorAll('.mpld3-tooltip');
-                
-                if (!tooltip) {{
-                    tooltip = document.createElement('div');  //沒有tooltip就自己創建!!->關鍵!
-                    tooltip.id = 'tooltip';
-                    tooltip.style.position = 'absolute';
-                    tooltip.style.display = 'none';
-                    tooltip.style.background = 'white';
-                    tooltip.style.border = '1px solid black';
-                    tooltip.style.padding = '5px';
-                    tooltip.style.zIndex = '1000';
-                    document.body.appendChild(tooltip);
-                }}
-
-              
-
-                //搜索框code
-                searchBox.addEventListener('input', function() {{
-                    var searchTerm = this.value.toLowerCase().trim();
-                    
-                    if (!searchResults) {{
-                        searchResults = document.createElement('ul');
-                        searchResults.id = 'search-results'; 
-                        this.parentNode.insertBefore(searchResults, this.nextSibling);
-                    }}
-                    searchResults.innerHTML = '';
-                    
-                    if (searchTerm === '') {{
-                        return;
-                    }}
-                    
-                    var matchedFileNames = [];
-                    for (var i = 0; i < fileNames.length; i++) {{
-                        var fileName = fileNames[i].toLowerCase();
-                        if (fileName.includes(searchTerm)) {{
-                            matchedFileNames.push({{ index: i, name: fileNames[i] }});
-                        }}
-                    }}
-                    
-                    matchedFileNames.forEach(function(match) {{
-                        var li = document.createElement('li');  //沒有就自己創建!!
-                        li.textContent = match.name;
-                        li.style.cursor = 'pointer';
-
-                        // When the mouse is over the list item
-                        li.onmouseover = function(event) {{
-                            // Find the index of match.name in combinedLabels
-                            var index = combinedLabels.findIndex(function(label) {{
-                                return label.includes(match.name);
-                            }});
-
-                            if (index !== -1) {{
-                                var tooltipEvent = new MouseEvent('mouseover', {{
-                                    view: window,
-                                    bubbles: true,
-                                    cancelable: true
-                                }});
-                                points[index].dispatchEvent(tooltipEvent);
-                            }}
-                        }};
-                        
-                       
-                        
-                        searchResults.appendChild(li);
-                    }});
-                }});
-
-                    // 點擊頁面其他地方時隱藏搜索結果
-                    document.addEventListener('click', function(event) {{
-                        if (event.target !== searchBox && event.target !== searchResults) {{
-                            searchResults.innerHTML = '';
-                        }}
-                    }});
-
-                }}
-
-             
-
-            
-
-    // 調用設置函數
-    setupSearchAndTooltip();   
+            var fileNames = {file_names_json};
+            var combinedLabels = {combined_labels_json};
         </script>
+        <script src ="keysearch.js"></script>
         ''')
-    
-
-#  // When the mouse is over the list item
-#                         li.onmouseover = function(event) {{
-#                             tooltip.innerHTML = combinedLabels[match.index]; 
-#                             tooltip.style.display = 'block'; // Make the tooltip visible
-#                             tooltip.style.left = event.pageX + 10 + 'px'; // Position tooltip 10px right of the cursor
-#                             tooltip.style.top = event.pageY + 10 + 'px'; // Position tooltip 10px below the cursor
-#                         }};
-                        
-#                         li.onmouseout = function() {{
-#                             tooltip.style.display = 'none';
-#                         }};
-                        
-#                         li.onclick = function() {{
-#                             searchBox.value = match.name;
-#                             searchResults.innerHTML = '';
-#                             // 可以在這裡添加其他點擊後的操作
-#                         }};
-
+   
+    # 存取到當前目錄中
+    js_file_path = r'D:\OCT\dental OCT\bare tooth\ensemble_model_aug\code\reqiured_funcs\keysearch.js'
+    # 確認 save_path 已正確設置
     today_date = datetime.now().strftime("%Y-%m-%d")
     save_dir = os.path.join(save_dir, today_date)
 
-    #建立儲存GUI的目錄
+    # 確認保存目錄已存在，若不存在則創建
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
+    # 將 keysearch.js 複製到保存目錄中，跟tSNE_combined.html在同路徑才能引入
+    shutil.copy(js_file_path, save_dir)
 
     save_path = os.path.join(save_dir, 'tSNE_combined.html')
     with open(save_path, 'w') as file:
@@ -1405,96 +1308,6 @@ def keySearch_tooltip_try(model, layer_name, test_data, test_labels, save_dir, c
 
 
 
-
-
-
-
-#多加的:成功把全部的圖像都畫出
-def create_html_with_search_and_gallery(combined_labels):
-    gallery_items = ''.join(combined_labels)
-    
-    html_str_with_style = f'''
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>tSNE Visualization with Search</title>
-        <style>
-            /* 这里可以添加您的 CSS 样式 */
-            #gallery {{
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-            }}
-            .image-container {{
-                margin: 10px;
-                text-align: center;
-            }}
-        </style>
-    </head>
-    <body>
-        <input type="text" id="search-box" onkeyup="searchFunction()" placeholder="Search for images...">
-        <div id="gallery">
-            {gallery_items}
-        </div>
-
-        <script>
-        var combinedLabels = {json.dumps(combined_labels)};
-
-        function searchFunction() {{
-            var input, filter, gallery, i, labelInfo;
-            input = document.getElementById('search-box');
-            filter = input.value.toLowerCase();
-            gallery = document.getElementById('gallery');
-            
-            gallery.innerHTML = '';
-            
-            for (i = 0; i < combinedLabels.length; i++) {{
-                var tempDiv = document.createElement('div');
-                tempDiv.innerHTML = combinedLabels[i];
-                
-                var trueLabelSpan = tempDiv.querySelector('.true-label');
-                if (trueLabelSpan) {{
-                    labelInfo = trueLabelSpan.textContent.toLowerCase();
-                    
-                    if (labelInfo.indexOf(filter) > -1) {{
-                        gallery.innerHTML += combinedLabels[i];
-                    }}
-                }}
-            }}
-            
-            if (gallery.children.length === 0) {{
-                gallery.innerHTML = '<p>No matching images found.</p>';
-            }}
-        }}
-        </script>
-    </body>
-    </html>
-    '''
-    return html_str_with_style
-
-#可以考慮新增圖形定格功能:不要讓圖因為關鍵字列表而跑版
-#要搜尋的資料點選定後，滑鼠移回搜尋欄時，不觸發其他點造成偏誤
-
-
-
-#  function searchFunction() {{
-#                 var input, filter, gallery,keywords, i;
-#                 input = document.getElementById('search-box'); //從html文本(document)中，根據id找到搜尋框
-#                 filter = input.value.toLowerCase();
-#                 gallery = document.getElementsByClassName('image-container');
-
-#                 for (i = 0; i < gallery.length; i++) {{
-#                     keywords = gallery[i].getAttribute('data-keywords');
-#                     if (keywords.toUpperCase().indexOf(filter) > -1) {{
-#                         gallery[i].style.display = "";
-#                     }} else {{
-#                         gallery[i].style.display = "none";
-#                     }}
-#                 }}
-#             }}
- 
 
 
 
