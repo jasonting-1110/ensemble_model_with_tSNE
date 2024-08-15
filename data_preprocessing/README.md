@@ -1,5 +1,5 @@
-# 中間記得空格!
-# 將電腦檔案總管的檔案上傳到github
+
+# 將電腦檔案總管的檔案上傳到github (中間記得空格!才能使用語法)
 ## 進入專案folder
 cd ensemble_model_with_tSNE
 ## 新增並進入subfolder
