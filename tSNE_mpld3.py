@@ -30,7 +30,7 @@ def extract_info_from_filename(filename):
     else:
         part0 = filename
 
-    match = re.search(r'(supra\d+|NOR\d+)', filename) #\d+:後面接至少1個數字
+    match = re.search(r'(supra\d+|NOR\d+)', filename) #\d+:後面接至少1個數字(根據前綴命名動態調整supra or NOR!!)
     #if match:
     return f"{part0} {match.group(1)}" if match else filename  #兩行簡化為一行 
     #return filename
@@ -75,8 +75,7 @@ def create_html_images_ID(encoded_string, CAM_encoded_string, true_label_info, p
     </div>      
     '''
 
-#搜尋引擎
-##########################
+
 def add_tooltips(folder, required_count):
     tooltips = []
     for filename in os.listdir(folder):
@@ -92,7 +91,7 @@ def add_tooltips(folder, required_count):
     return tooltips[:required_count]
 
 
-##########################
+
 
 
 #測試合併原圖及cam
@@ -189,7 +188,7 @@ def plot_tSNEBest(model, layer_name, test_data, test_labels, save_dir, cal_folde
             html_content = create_html_with_image(encoded_string, true_label_info, predicted_labels_group[j])
             combined_labels.append(html_content)
 
-            #與圖例出現3個點的原因無關
+            #根據前綴命名動態調整條件式!!
             if ('supra' in true_label_info and predicted_labels_group[j] == 'nor'): 
                 ax.scatter(group.x.iloc[j], group.y.iloc[j], marker='x', color='red', s=10)
                 cal_cls_error_count += 1
