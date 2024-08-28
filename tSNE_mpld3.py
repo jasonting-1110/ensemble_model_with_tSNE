@@ -75,8 +75,7 @@ def create_html_images_ID(encoded_string, CAM_encoded_string, true_label_info, p
     </div>      
     '''
 
-#搜尋引擎
-##########################
+
 def add_tooltips(folder, required_count):
     tooltips = []
     for filename in os.listdir(folder):
@@ -92,7 +91,7 @@ def add_tooltips(folder, required_count):
     return tooltips[:required_count]
 
 
-##########################
+
 
 
 #測試合併原圖及cam
