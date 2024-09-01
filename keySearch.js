@@ -21,7 +21,7 @@ var combinedLabels = {combined_labels_json}; */
          tooltip = document.createElement('div');  //沒有tooltip就自己創建!!->關鍵!
          tooltip.id = 'tooltip';
          tooltip.style.position = 'absolute';
-         tooltip.style.display = 'none';
+         tooltip.style.display = 'none'; //最初被隱藏，只有在滑鼠懸停在搜索結果上時才會顯示工具提示
          tooltip.style.background = 'white';
          tooltip.style.border = '1px solid black';
          tooltip.style.padding = '5px';
@@ -29,21 +29,26 @@ var combinedLabels = {combined_labels_json}; */
          document.body.appendChild(tooltip);
      }}
 
+     //當用戶在搜索框中輸入內容時，觸發 input 事件
      searchBox.addEventListener('input', function() {{
          console.log('Input event triggered'); // Debug
          var searchTerm = this.value.toLowerCase().trim();
-         
+
+         //檢查是否存在 searchResults 列表元素，如果不存在就創建一個 ul 列表，並插入到搜索框的後面
          if (!searchResults) {{
              searchResults = document.createElement('ul');
              searchResults.id = 'search-results'; 
              this.parentNode.insertBefore(searchResults, this.nextSibling);
          }}
+         //清空 searchResults 的內容，以便重新顯示匹配結果
          searchResults.innerHTML = '';
          
          if (searchTerm === '') {{
              return;
          }}
-         
+
+         /*遍歷 fileNames 列表，將每個文件名轉換為小寫，並檢查它是否包含 searchTerm。
+           如果匹配，將文件名和其索引加入到 matchedFileNames 陣列中*/
          var matchedFileNames = [];
          for (var i = 0; i < fileNames.length; i++) {{
              var fileName = fileNames[i].toLowerCase();
