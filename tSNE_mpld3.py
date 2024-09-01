@@ -18,6 +18,21 @@ import shutil
 #函式參數的輸入
 #model:ensemble_model layer_name 'dense_5' test_data=[test_data, test_data]
 
+def add_tooltips(folder, required_count):
+    tooltips = []
+    for filename in os.listdir(folder):
+        image_path = os.path.join(folder, filename)
+        if os.path.isfile(image_path):
+            tooltip = f'<div class="file-name">{filename}</div><img src="{image_path}">'
+            tooltips.append((filename, tooltip))
+    
+    while len(tooltips) < required_count:
+        tooltips.extend(tooltips[:required_count - len(tooltips)])
+    
+    print(f"Generated {len(tooltips)} tooltips from folder: {folder}")
+    return tooltips[:required_count]
+
+
 #一個存取許多圖像的list
 def count_files_in_folder(folder_path):
     return len([name for name in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, name))])
@@ -76,19 +91,7 @@ def create_html_images_ID(encoded_string, CAM_encoded_string, true_label_info, p
     '''
 
 
-def add_tooltips(folder, required_count):
-    tooltips = []
-    for filename in os.listdir(folder):
-        image_path = os.path.join(folder, filename)
-        if os.path.isfile(image_path):
-            tooltip = f'<div class="file-name">{filename}</div><img src="{image_path}">'
-            tooltips.append((filename, tooltip))
-    
-    while len(tooltips) < required_count:
-        tooltips.extend(tooltips[:required_count - len(tooltips)])
-    
-    print(f"Generated {len(tooltips)} tooltips from folder: {folder}")
-    return tooltips[:required_count]
+
 
 
 
