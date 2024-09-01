@@ -56,12 +56,17 @@ var combinedLabels = {combined_labels_json}; */
                  matchedFileNames.push({ index: i, name: fileNames[i] });
              }}
          }}
-         
+
+         /*為每個匹配的文件名創建一個 li 元素，並將其文本內容設置為文件名。
+           設置 li 的樣式，讓它在滑鼠懸停時呈現為可點擊狀態*/
          matchedFileNames.forEach(function(match) {{
              var li = document.createElement('li');  //沒有就自己創建!!
              li.textContent = match.name;
              li.style.cursor = 'pointer';
-             
+
+             /*當滑鼠懸停在 li 上時，顯示工具提示 (tooltip)。
+               工具提示的內容是對應的 combinedLabels，並且根據
+               滑鼠的位置來動態設置工具提示的位置*/
              li.onmouseover = function(event) {{
                  tooltip.innerHTML = combinedLabels[match.index]; 
                  tooltip.style.display = 'block';
@@ -72,18 +77,19 @@ var combinedLabels = {combined_labels_json}; */
              li.onmouseout = function() {{
                  tooltip.style.display = 'none';
              }};
-             
+
+             //當用戶點擊某個搜索結果時，將該文件名填入搜索框，並清空搜索結果列表。
              li.onclick = function() {{
                  searchBox.value = match.name;
                  searchResults.innerHTML = '';
-                 // 可以在這裡添加其他點擊後的操作
+                 
              }};
              
              searchResults.appendChild(li);
          }});
      }});
 
-     // 點擊頁面其他地方時隱藏搜索結果
+     // 點擊頁面搜索框和搜索結果之外的其他地方時隱藏搜索結果
      document.addEventListener('click', function(event) {{
          if (event.target !== searchBox && event.target !== searchResults) {{
              searchResults.innerHTML = '';
