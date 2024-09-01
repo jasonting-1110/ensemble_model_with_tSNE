@@ -66,7 +66,8 @@ var combinedLabels = {combined_labels_json}; */
 
              /*當滑鼠懸停在 li 上時，顯示工具提示 (tooltip)。
                工具提示的內容是對應的 combinedLabels，並且根據
-               滑鼠的位置來動態設置工具提示的位置*/
+               滑鼠的位置來動態設置工具提示的位置，
+               透過在li中的各種操作，把matchedFileNames中的元素與tooltip連結*/
              li.onmouseover = function(event) {{
                  tooltip.innerHTML = combinedLabels[match.index]; 
                  tooltip.style.display = 'block';
@@ -80,7 +81,7 @@ var combinedLabels = {combined_labels_json}; */
 
              //當用戶點擊某個搜索結果時，將該文件名填入搜索框，並清空搜索結果列表。
              li.onclick = function() {{
-                 searchBox.value = match.name;
+                 searchBox.value = match.name; //對應li.textContent = match.name
                  searchResults.innerHTML = '';
                  
              }};
