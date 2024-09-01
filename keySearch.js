@@ -61,7 +61,7 @@ var combinedLabels = {combined_labels_json}; */
            設置 li 的樣式，讓它在滑鼠懸停時呈現為可點擊狀態*/
          matchedFileNames.forEach(function(match) {{
              var li = document.createElement('li');  //沒有就自己創建!!
-             li.textContent = match.name;
+             li.textContent = match.name; //根據 matchedFileNames.push({ index: i, name: fileNames[i] })中的name屬性找到fileNames[i]
              li.style.cursor = 'pointer';
 
              /*當滑鼠懸停在 li 上時，顯示工具提示 (tooltip)。
