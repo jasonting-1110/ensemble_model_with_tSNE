@@ -1130,6 +1130,7 @@ def keySearch_optimize(model, layer_name, test_data, test_labels, save_dir, cal_
     intermediate_layer_model = Model(inputs=model.input, outputs=model.get_layer(layer_name).output)
     intermediate_output = intermediate_layer_model.predict(test_data, batch_size=batch_size, verbose=1)
 
+    #perplexity:5-50; 且可以嘗試用 init='pca' 看看是否會改善結果
     Y = TSNE(n_components=2, init='random', random_state=0, perplexity=10, verbose=1).fit_transform(
         intermediate_output.reshape(intermediate_output.shape[0], -1))
 
