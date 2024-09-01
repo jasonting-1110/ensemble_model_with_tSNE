@@ -18,6 +18,11 @@ import shutil
 #函式參數的輸入
 #model:ensemble_model layer_name 'dense_5' test_data=[test_data, test_data]
 
+#一個存取許多圖像的list
+def count_files_in_folder(folder_path):
+    return len([name for name in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, name))])
+
+
 def add_tooltips(folder, required_count):
     tooltips = []
     for filename in os.listdir(folder):
@@ -32,10 +37,6 @@ def add_tooltips(folder, required_count):
     print(f"Generated {len(tooltips)} tooltips from folder: {folder}")
     return tooltips[:required_count]
 
-
-#一個存取許多圖像的list
-def count_files_in_folder(folder_path):
-    return len([name for name in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, name))])
 
 
 def extract_info_from_filename(filename):
