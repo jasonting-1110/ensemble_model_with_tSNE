@@ -4,8 +4,8 @@ def create_directories(root_directory):
     os.makedirs(root_directory, exist_ok=True)
 
     # Define the folder names
-    train_folder = "train"
-    test_folder = "test"
+    train_folder = "train_FOR_YOUR_LIFE"
+    test_folder = "test_FOR_YOUR_LIFE"
 
     # Create the train and test directories
     train_directory = os.path.join(root_directory, train_folder)

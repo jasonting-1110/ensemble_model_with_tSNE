@@ -1,5 +1,5 @@
 import os
-import random
+
 import shutil
 
 
@@ -12,16 +12,6 @@ def split(src_path,train_path,test_path,*prefixes):
     if not os.path.exists(train_path):
         os.makedirs(train_path)
 
-    #錯誤code!!!# # 遍历源目录中的文件:
-    # for filename in os.listdir(src_path):
-    #     for prefix in prefixes:
-    #         if filename.startswith(prefix):  # 如果文件以 某字串 开头 ex:'NOR7'
-    #             # 复制到测试目录
-    #             shutil.copy(os.path.join(src_path, filename), test_path)
-    #     else:
-    #         # 复制到训练目录
-    #         shutil.copy(os.path.join(src_path, filename), train_path)
-
     # 遍历源目录中的文件
     for filename in os.listdir(src_path):
         copy_to_test = False
@@ -31,8 +21,10 @@ def split(src_path,train_path,test_path,*prefixes):
                 shutil.copy(os.path.join(src_path, filename), test_path)
                 copy_to_test = True
                 break
+                
         if not copy_to_test:
             # 复制到训练目录
             shutil.copy(os.path.join(src_path, filename), train_path)
 
     print("Files copied successfully.")
+
