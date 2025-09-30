@@ -8,4 +8,4 @@
 - [關鍵字搜尋](required_funcs/keysearch_try.js)
 
 - ## 其他 Branch 資源
-- [imgPreprocessing branch:資料前處理](https://github.com/jasonting-1110/ensemble_model_with_tSNE/tree/imgPreprocessing/2024_8_13/dat_data_preprocessing)
+- [imgPreprocessing branch:資料前處理](https://github.com/jasonting-1110/ensemble_model_with_tSNE/tree/imgPreprocessing/2024_8_13/dat_data_preprocessing/840_OCT_loopTest.ipynb)
