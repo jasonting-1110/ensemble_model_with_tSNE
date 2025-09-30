@@ -12,3 +12,12 @@
 
 ## 輸出
 - `tsne_plot.html`：可互動的視覺化結果
+
+# 專案總覽
+
+這個專案包含多個 Notebook 與功能模組，詳細說明請參考以下文件：
+
+- [資料前處理](data_preprocessing/README.md)
+- [模型訓練與集成](ensemble_training/README.md)
+- [t-SNE 視覺化](tsne_visualization/README.md)
+
