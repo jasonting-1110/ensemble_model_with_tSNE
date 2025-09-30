@@ -20,4 +20,6 @@
 - [資料前處理](data_preprocessing/README.md)
 - [模型訓練與集成](ensemble_training/README.md)
 - [t-SNE 視覺化](tsne_visualization/README.md)
+- [關鍵字搜尋](ensemble_model_with_tSNE
+/required_funcs/keysearch_try.js)
 
